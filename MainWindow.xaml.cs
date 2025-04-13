@@ -203,10 +203,9 @@ public partial class MainWindow : Window
         //    summarizedstats.buffcontrolnpc + ", " + summarizedstats.buffdroprate);
 
         // Get top 3 indices across all stats
-        int accumulatedPoints = 0;
-        accumulatedPoints += ClampStatsTo24AndAccumulateExcess(allStats, accumulatedPoints);
+        int accumulatedPoints = ClampStatsTo24AndAccumulateExcess(allStats, 0);
         int[] top3Indices = GetTop3Indices(allStats);
-        accumulatedPoints += AccumulateAndResetStats(allStats, top3Indices, accumulatedPoints);
+        accumulatedPoints = AccumulateAndResetStats(allStats, top3Indices, accumulatedPoints);
         // Check if we didn't already have top3 then put stats on other stats in top3
         if (accumulatedPoints > 0)
         {
@@ -447,7 +446,6 @@ public partial class MainWindow : Window
     {
         int randomValue = rnd.Next(totalWeight);
         int cumulativeWeight = 0;
-
         for (int i = 0; i < weights.Length; i++)
         {
             cumulativeWeight += weights[i];
@@ -456,8 +454,7 @@ public partial class MainWindow : Window
                 return i;
             }
         }
-
-        return weights.Length - 1; // Fallback
+        return -1; // Should not happen if totalWeight is calculated correctly
     }
     public static void UpdateCharStat(RandomizedStatScore stats, int selection)
     {
@@ -544,28 +541,68 @@ public partial class MainWindow : Window
 
     public static int[] GetTop3Indices(int[] stats)
     {
-        return stats
+        if (stats == null || stats.Length == 0)
+        {
+            return new int[0];
+        }
+
+        var indexedStats = stats
             .Select((value, index) => new { Value = value, Index = index })
-            .Where(x => x.Value < 24) // Exclude 24 and above
             .OrderByDescending(x => x.Value)
-            .Take(3)
-            .Select(x => x.Index)
-            .ToArray();
+            .ToList();
+
+        var topThreeValues = indexedStats.Take(3).Select(x => x.Value).Distinct().ToList();
+
+        var indicesByValue = indexedStats
+            .Where(x => topThreeValues.Contains(x.Value))
+            .GroupBy(x => x.Value)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Index).ToList());
+
+        var resultIndices = new List<int>();
+        Random random = new Random();
+
+        foreach (var value in topThreeValues)
+        {
+            if (indicesByValue.TryGetValue(value, out var indices))
+            {
+                var needed = 3 - resultIndices.Count;
+                if (needed > 0)
+                {
+                    if (indices.Count <= needed)
+                    {
+                        resultIndices.AddRange(indices);
+                    }
+                    else
+                    {
+                        var selected = indices.OrderBy(x => random.Next()).Take(needed).ToList();
+                        resultIndices.AddRange(selected);
+                    }
+                }
+            }
+            if (resultIndices.Count == 3)
+            {
+                break;
+            }
+        }
+
+        return resultIndices.OrderBy(i => i).ToArray();
     }
 
     public static int AccumulateAndResetStats(int[] stats, int[] topIndices, int accumulatedPoints)
     {
+        // Create a HashSet for faster lookups of top indices
+        HashSet<int> topIndexSet = new HashSet<int>(topIndices);
+
         for (int i = 0; i < stats.Length; i++)
         {
-            if (!topIndices.Contains(i))
+            // Only process stats that are NOT in the top indices
+            if (!topIndexSet.Contains(i))
             {
-                if (stats[i] < 24)
-                {
-                    accumulatedPoints += stats[i];
-                    stats[i] = 0;
-                }
-                // else (stats[i] == 24), leave it as-is
+                accumulatedPoints += stats[i];
+                stats[i] = 0;
             }
+            // Stats at topIndices are neither accumulated nor reset.
+            // The reason for this exclusion should be documented.
         }
 
         return accumulatedPoints;
@@ -578,24 +615,30 @@ public partial class MainWindow : Window
 
         while (points > 0 && eligibleIndices.Count > 0)
         {
+            // Filter out indices that have reached the limit
+            eligibleIndices = eligibleIndices.Where(index => stats[index] < 24).ToList();
+
+            if (eligibleIndices.Count == 0)
+            {
+                break; // No more eligible indices below the limit
+            }
+
             int[] weights = eligibleIndices.Select(index => stats[index]).ToArray();
             int totalWeight = weights.Sum();
 
             if (totalWeight == 0)
-                break; // Avoid divide-by-zero or pointless distribution
+            {
+                break; // All eligible indices have a weight of 0 (shouldn't happen if values are < 24 and non-negative)
+            }
 
             int selectedOffset = WeightedRandomSelection(weights, totalWeight, rnd);
-            int selectedIndex = eligibleIndices[selectedOffset];
+            int statIndex = eligibleIndices[selectedOffset];
 
-            stats[selectedIndex]++;
+            stats[statIndex]++;
             points--;
-
-            if (stats[selectedIndex] >= 24)
-            {
-                eligibleIndices.RemoveAt(selectedOffset); // Stop distributing to this one
-            }
         }
     }
+
 
     public static RandomizedStatScore TranslateStatsToText(RandomizedStatScore stats)
     {
