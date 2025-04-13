@@ -188,15 +188,25 @@ public partial class MainWindow : Window
             summarizedstats.windreduction, summarizedstats.pangyapxnpc, summarizedstats.buffpangnpc, summarizedstats.buffexpnpc,
             summarizedstats.buffcontrolnpc, summarizedstats.buffdroprate
         };
+
         //Debug stats Before weighted distributed randomization
+        PreSumOfPoints.Content = (summarizedstats.power + summarizedstats.control + summarizedstats.impact +
+                                summarizedstats.spin +summarizedstats.curve + summarizedstats.speciallength +
+                                summarizedstats.speciallengthgauge + summarizedstats.pangyapx + summarizedstats.initialguage +
+                                summarizedstats.passivegauge + summarizedstats.windreduction + summarizedstats.pangyapxnpc +
+                                summarizedstats.buffpangnpc + summarizedstats.buffexpnpc + summarizedstats.buffcontrolnpc +
+                                summarizedstats.buffdroprate).ToString();
+        DistributionPointA.Content = "[" + string.Join(", ", allStats) + "]";
         //MessageBox.Show("Before : " + summarizedstats.power + ", " + summarizedstats.control + ", " + summarizedstats.impact + ", " + summarizedstats.spin + ", " + summarizedstats.curve + ", " + summarizedstats.speciallength + ", " +
         //    summarizedstats.speciallengthgauge + ", " + summarizedstats.pangyapx + ", " + summarizedstats.initialguage + ", " + summarizedstats.passivegauge + ", " +
         //    summarizedstats.windreduction + ", " + summarizedstats.pangyapxnpc + ", " + summarizedstats.buffpangnpc + ", " + summarizedstats.buffexpnpc + ", " +
         //    summarizedstats.buffcontrolnpc + ", " + summarizedstats.buffdroprate);
 
         // Get top 3 indices across all stats
-        var top3Indices = GetTop3Indices(allStats);
-        int accumulatedPoints = AccumulateAndResetStats(allStats, top3Indices);
+        int accumulatedPoints = 0;
+        accumulatedPoints += ClampStatsTo24AndAccumulateExcess(allStats, accumulatedPoints);
+        int[] top3Indices = GetTop3Indices(allStats);
+        accumulatedPoints += AccumulateAndResetStats(allStats, top3Indices, accumulatedPoints);
         // Check if we didn't already have top3 then put stats on other stats in top3
         if (accumulatedPoints > 0)
         {
@@ -246,7 +256,13 @@ public partial class MainWindow : Window
                     break;
             }
         }
-        
+        DistributionPointB.Content = "[" + string.Join(", ", allStats) + "]";
+        PostSumOfPoints.Content = (summarizedstats.power + summarizedstats.control + summarizedstats.impact +
+                                summarizedstats.spin + summarizedstats.curve + summarizedstats.speciallength +
+                                summarizedstats.speciallengthgauge + summarizedstats.pangyapx + summarizedstats.initialguage +
+                                summarizedstats.passivegauge + summarizedstats.windreduction + summarizedstats.pangyapxnpc +
+                                summarizedstats.buffpangnpc + summarizedstats.buffexpnpc + summarizedstats.buffcontrolnpc +
+                                summarizedstats.buffdroprate).ToString();
         EnableButton();
         RandomizeCount++;
         RandCounterText.Content = RandomizeCount.ToString();
@@ -441,7 +457,7 @@ public partial class MainWindow : Window
             }
         }
 
-        return weights.Length - 1; // In case of rounding errors
+        return weights.Length - 1; // Fallback
     }
     public static void UpdateCharStat(RandomizedStatScore stats, int selection)
     {
@@ -511,43 +527,73 @@ public partial class MainWindow : Window
                 throw new ArgumentOutOfRangeException(nameof(selection), "Invalid selection index");
         }
     }
-    public static int[] GetTop3Indices(int[] stats)
+    public static int ClampStatsTo24AndAccumulateExcess(int[] stats, int accumulatedPoints)
     {
-        return stats
-            .Select((value, index) => new { Value = value, Index = index })
-            .OrderByDescending(x => x.Value)
-            .Take(3)
-            .Select(x => x.Index)
-            .ToArray();
-    }
-
-    public static int AccumulateAndResetStats(int[] stats, int[] topIndices)
-    {
-        int accumulatedPoints = 0;
-
         for (int i = 0; i < stats.Length; i++)
         {
-            if (!topIndices.Contains(i))
+            if (stats[i] > 24)
             {
-                accumulatedPoints += stats[i];
-                stats[i] = 0;
+                accumulatedPoints += stats[i] - 24;
+                stats[i] = 24;
             }
         }
 
         return accumulatedPoints;
     }
 
+
+    public static int[] GetTop3Indices(int[] stats)
+    {
+        return stats
+            .Select((value, index) => new { Value = value, Index = index })
+            .Where(x => x.Value < 24) // Exclude 24 and above
+            .OrderByDescending(x => x.Value)
+            .Take(3)
+            .Select(x => x.Index)
+            .ToArray();
+    }
+
+    public static int AccumulateAndResetStats(int[] stats, int[] topIndices, int accumulatedPoints)
+    {
+        for (int i = 0; i < stats.Length; i++)
+        {
+            if (!topIndices.Contains(i))
+            {
+                if (stats[i] < 24)
+                {
+                    accumulatedPoints += stats[i];
+                    stats[i] = 0;
+                }
+                // else (stats[i] == 24), leave it as-is
+            }
+        }
+
+        return accumulatedPoints;
+    }
+
+
     public static void DistributePointsToTop3(int[] stats, int[] topIndices, int points, Random rnd)
     {
-        // Calculate weights for the top 3 indices
-        int[] topWeights = topIndices.Select(index => stats[index]).ToArray();
-        int totalTopWeight = topWeights.Sum();
+        List<int> eligibleIndices = topIndices.ToList();
 
-        while (points > 0)
+        while (points > 0 && eligibleIndices.Count > 0)
         {
-            int selectedIndex = WeightedRandomSelection(topWeights, totalTopWeight, rnd);
-            stats[topIndices[selectedIndex]]++;
+            int[] weights = eligibleIndices.Select(index => stats[index]).ToArray();
+            int totalWeight = weights.Sum();
+
+            if (totalWeight == 0)
+                break; // Avoid divide-by-zero or pointless distribution
+
+            int selectedOffset = WeightedRandomSelection(weights, totalWeight, rnd);
+            int selectedIndex = eligibleIndices[selectedOffset];
+
+            stats[selectedIndex]++;
             points--;
+
+            if (stats[selectedIndex] >= 24)
+            {
+                eligibleIndices.RemoveAt(selectedOffset); // Stop distributing to this one
+            }
         }
     }
 
@@ -571,9 +617,9 @@ public partial class MainWindow : Window
         {
             if (stats.control >= 24)
                 stats.stat.Add("Control +5");
-            else if (stats.control >= 16)
+            else if (stats.control >= 18)
                 stats.stat.Add("Control +4");
-            else if (stats.control >= 10)
+            else if (stats.control >= 12)
                 stats.stat.Add("Control +3");
             else if (stats.control >= 5)
                 stats.stat.Add("Control +2");
@@ -582,18 +628,18 @@ public partial class MainWindow : Window
         }
         if (stats.impact != 0)
         {
-            if (stats.impact >= 18)
-                stats.stat.Add("50% chance to correct missed pangya shot, +20% clubset experience.");
+            if (stats.impact >= 24)
+                stats.stat.Add("80% chance to correct missed pangya shot, +25% clubset experience.");
+            else if (stats.impact >= 18)
+                stats.stat.Add("50% chance to correct missed pangya shot.");
             else if (stats.impact >= 12)
                 stats.stat.Add("30% chance to correct missed pangya shot.");
-            else if (stats.impact >= 7)
+            else if (stats.impact >= 5)
                 stats.stat.Add("20% chance to correct missed pangya shot.");
-            else if (stats.impact >= 3)
-                stats.stat.Add("15% chance to correct missed pangya shot.");
             else
                 stats.stat.Add("10% chance to correct missed pangya shot.");
         }
-        if (stats.spin != 0)
+        if (stats.spin > 0)
         {
             if (stats.spin >= 24)
                 stats.stat.Add("Spin +5");
@@ -606,7 +652,7 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Spin +1");
         }
-        if (stats.curve != 0)
+        if (stats.curve > 0)
         {
             if (stats.curve >= 24)
                 stats.stat.Add("Curve +5");
@@ -619,7 +665,7 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Curve +1");
         }
-        if (stats.speciallength != 0)
+        if (stats.speciallength > 0)
         {
             if (stats.speciallength >= 24)
                 stats.stat.Add("+8 Yards [No control penalty!]");
@@ -632,7 +678,7 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("+1 Yard [No control penalty!]");
         }
-        if (stats.speciallengthgauge != 0)
+        if (stats.speciallengthgauge > 0)
         {
             if (stats.speciallengthgauge >= 24)
                 stats.stat.Add("Special shot Length +12 Yards");
@@ -645,7 +691,7 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Special shot Length +4 Yards");
         }
-        if (stats.pangyapx != 0)
+        if (stats.pangyapx > 0)
         {
             if (stats.pangyapx >= 24)
                 stats.stat.Add("Pangya bar +4 pixels");
@@ -658,7 +704,7 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Pangya bar +0.5 pixel");
         }
-        if (stats.initialguage != 0)
+        if (stats.initialguage > 0)
         {
             if (stats.initialguage >= 24)
                 stats.stat.Add("Initial guage +60 points");
@@ -671,7 +717,7 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Initial guage +10 points");
         }
-        if (stats.passivegauge != 0)
+        if (stats.passivegauge > 0)
         {
             if (stats.passivegauge >= 24)
                 stats.stat.Add("Guage +6 points when hit pangya");
@@ -684,7 +730,7 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Guage +1 point when hit pangya");
         }
-        if (stats.windreduction != 0)
+        if (stats.windreduction > 0)
         {
             //Random rndnum = new Random();
             //int mynumber = rndnum.Next(0, 2);
@@ -708,9 +754,11 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("3% chance to change wind direction to headwind/tailwind");
         }
-        if (stats.pangyapxnpc != 0)
+        if (stats.pangyapxnpc > 0)
         {
-            if (stats.pangyapxnpc >= 18)
+            if (stats.pangyapxnpc >= 24)
+                stats.stat.Add("Pangya bar +4 pixels, when club length is longer than 300y");
+            else if (stats.pangyapxnpc >= 18)
                 stats.stat.Add("Pangya bar +2 pixels, when club length is longer than 300y");
             else if (stats.pangyapxnpc >= 12)
                 stats.stat.Add("Pangya bar +1.5 pixels, when club length is longer than 300y");
@@ -719,9 +767,11 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Pangya bar +0.5 pixel, when club length is longer than 260y");
         }
-        if (stats.buffpangnpc != 0)
+        if (stats.buffpangnpc > 0)
         {
-            if (stats.buffpangnpc >= 18)
+            if (stats.buffpangnpc >= 24)
+                stats.stat.Add("Pang +20%");
+            else if (stats.buffpangnpc >= 18)
                 stats.stat.Add("Pang +15%");
             else if (stats.buffpangnpc >= 12)
                 stats.stat.Add("Pang +10%");
@@ -730,9 +780,11 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Pang +2%");
         }
-        if (stats.buffexpnpc != 0)
+        if (stats.buffexpnpc > 0)
         {
-            if (stats.buffexpnpc >= 18)
+            if (stats.buffexpnpc >= 24)
+                stats.stat.Add("Exp +20%");
+            else if (stats.buffexpnpc >= 18)
                 stats.stat.Add("Exp +15%");
             else if (stats.buffexpnpc >= 12)
                 stats.stat.Add("Exp +10%");
@@ -741,10 +793,12 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Exp +2%");
         }
-        if (stats.buffcontrolnpc != 0)
+        if (stats.buffcontrolnpc > 0)
         {
-            if (stats.buffcontrolnpc >= 18)
+            if (stats.buffcontrolnpc >= 24)
                 stats.stat.Add("Control +5, when club length is longer than 300y");
+            else if (stats.buffcontrolnpc >= 18)
+                stats.stat.Add("Control +4, when club length is longer than 300y");
             else if (stats.buffcontrolnpc >= 12)
                 stats.stat.Add("Control +3, when club length is longer than 300y");
             else if (stats.buffcontrolnpc >= 5)
@@ -752,16 +806,18 @@ public partial class MainWindow : Window
             else
                 stats.stat.Add("Control +1, when club length is longer than 260y");
         }
-        if (stats.buffdroprate != 0)
+        if (stats.buffdroprate > 0)
         {
-            if (stats.buffdroprate >= 18)
+            if (stats.buffdroprate >= 24)
                 stats.stat.Add("+5% Item drop rate.");
+            else if (stats.buffdroprate >= 18)
+                stats.stat.Add("+2.5% Item drop rate.");
             else if (stats.buffdroprate >= 12)
-                stats.stat.Add("+3% Item drop rate.");
+                stats.stat.Add("+1.5% Item drop rate.");
             else if (stats.buffdroprate >= 5)
-                stats.stat.Add("+2% Item drop rate.");
-            else
                 stats.stat.Add("+1% Item drop rate.");
+            else
+                stats.stat.Add("+0.5% Item drop rate.");
         }
         //Fill list if < 3 options
         while (stats.stat.Count < 3)
@@ -870,8 +926,6 @@ public partial class MainWindow : Window
         Special_Clubset_Type1.IsEnabled = true;
         Special_Clubset_Type2.IsEnabled = true;
     }
-    #endregion
-
     private void Special_Clubset_Type1_Checked(object sender, RoutedEventArgs e)
     {
         if (Special_Clubset_Type1.IsChecked == true)
@@ -903,4 +957,5 @@ public partial class MainWindow : Window
         RandomizeCount = 0;
         RandCounterText.Content = RandomizeCount.ToString();
     }
+    #endregion
 }
