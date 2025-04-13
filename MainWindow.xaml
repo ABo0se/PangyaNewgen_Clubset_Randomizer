@@ -1,0 +1,87 @@
+﻿<Window x:Name="MainWindow1" x:Class="PangyaRandomizerDesign.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PangyaRandomizerDesign"
+        mc:Ignorable="d"
+        Title="PangyaClubOptionRandomizer" Height="450" Width="800" Background="White" ResizeMode="NoResize">
+    <Grid ShowGridLines="True" x:Name="Grid" HorizontalAlignment="Left" Height="385" Margin="25,25,0,0" VerticalAlignment="Top" Width="750">
+        <StackPanel Orientation="Vertical">
+            <Label Content="เลือกการ์ด SC/UL 1-3 ใบเพื่อทำออฟไม้" FontSize="20" Margin="5,10,5,10"></Label>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="เลือกการ์ด :" FontSize="18" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"></Label>
+                <ComboBox x:Name="CardOption" Height="30" Width="200" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="18">
+                    <ComboBoxItem Content="CadieSC"/>
+                    <ComboBoxItem Content="TitanBooSC"/>
+                    <ComboBoxItem Content="HanaSC"/>
+                    <ComboBoxItem Content="NuriSC"/>
+                    <ComboBoxItem Content="ArthurSC"/>
+                    <ComboBoxItem Content="NellSC"/>
+                    <ComboBoxItem Content="SpikaSC"/>
+                    <ComboBoxItem Content="PippinSC"/>
+                    <ComboBoxItem Content="LuciaSC"/>
+                    <ComboBoxItem Content="MintySC"/>
+                    <ComboBoxItem Content="KoohSC"/>
+                    <ComboBoxItem Content="CeciliaSC"/>
+                    <ComboBoxItem Content="MaxSC"/>
+                    <ComboBoxItem Content="ArinSC"/>
+                    <ComboBoxItem Content="KazSC"/>
+                    <ComboBoxItem Content="ArchSC"/>
+                    <ComboBoxItem Content="KettoshiSC"/>
+                    <ComboBoxItem Content="LilimSC"/>
+                    <ComboBoxItem Content="SuccubusSC"/>
+                    <ComboBoxItem Content="DominionSC"/>
+                    <ComboBoxItem Content="KyungshiSC"/>
+                    <ComboBoxItem Content="BaphometSC"/>
+                    <ComboBoxItem Content="TitanChamSC"/>
+                    <ComboBoxItem Content="SaberSC"/>
+                    <ComboBoxItem Content="RyoTohsakaSC"/>
+                    <ComboBoxItem Content="BongdariSC"/>
+                    <ComboBoxItem Content="LoloSC"/>
+                    <ComboBoxItem Content="KumaSC"/>
+                    <ComboBoxItem Content="LukaSC"/>
+                    <ComboBoxItem Content="CamenSC"/>
+                    <ComboBoxItem Content="MurenSC"/>
+                    <ComboBoxItem Content="CadieUL"/>
+                    <ComboBoxItem Content="TitanBooUL"/>
+                    <ComboBoxItem Content="MintyUL"/>
+                    <ComboBoxItem Content="MaxUL"/>
+                    <ComboBoxItem Content="KumaUL"/>
+                    <ComboBoxItem Content="PippinUL"/>
+                    <ComboBoxItem Content="KoohUL"/>
+                </ComboBox>
+                <Button Content="Add card" x:Name="AddCardButton"  Click="AddCard" Height="30" Width="115" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <Button x:Name="RemoveRecentCardButton" Content="Remove last card" Click="RemoveLastCard" Height="30" Width="125" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="การ์ดที่เลือก :" FontSize="18" Margin="5,10,5,10" HorizontalAlignment="Left" VerticalAlignment="Center"></Label>
+                <StackPanel x:Name="ChosenCard" Orientation="Horizontal">
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="Special_Clubset_Type1" Width="16" Height="16" HorizontalAlignment="Left" Margin="10,0,5,0" VerticalAlignment="Center" Checked="Special_Clubset_Type1_Checked"/>
+                <Label x:Name="Use_SpecialClub_Text_Type1" Content="ใช้ไม้แปลงร่าง" FontSize="16"/>
+                <CheckBox x:Name="Special_Clubset_Type2" Width="16" Height="16" HorizontalAlignment="Left" Margin="10,0,5,0" VerticalAlignment="Center" Checked="Special_Clubset_Type2_Checked"/>
+                <Label x:Name="Use_SpecialClub_Text_Type2" Content="ใช้ไม้ครบรอบ 4 ปี / 5 ปี" FontSize="16"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="RandomizeButton" Content="Randomize stats" Click="RandStats" Height="30" Width="125" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <Button x:Name="ResetCountButton" Content="Reset counter" Click="ResetCount" Height="30" Width="125" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <Button x:Name="ResetButton" Content="Reset" Click="Reset" Height="30" Width="125" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            </StackPanel>
+            <Label Content="ออฟชั่นที่ได้ [มากที่สุด 3 ออฟชั่น]" FontSize="20" Margin="5,10,5,10" HorizontalAlignment="Left" VerticalAlignment="Center"></Label>
+            <StackPanel x:Name="YourOption" Orientation="Vertical">
+                <Label x:Name="Option1" Content="-" FontSize="16" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"></Label>
+                <Label x:Name="Option2" Content="-" FontSize="16" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"></Label>
+                <Label x:Name="Option3" Content="-" FontSize="16" Margin="5,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"></Label>
+            </StackPanel>
+            <StackPanel x:Name="EndLabel" Orientation="Horizontal">
+                <Label Content="ขอให้โชคดีในการสุ่มออฟชั่นไม้ !!" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,20,0,20"/>
+                <Label Content="สุ่มไปแล้ว :" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,20,0,20"/>
+                <Label x:Name="RandCounterText" Content="0" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,20,0,20"/>
+                <Label Content="ครั้ง" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,20,0,20"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
