@@ -67,6 +67,12 @@ public partial class MainWindow : Window
             newoption.buffpangnpc = 12;
             newoption.buffexpnpc = 12;
         }
+        else if (Special_Clubset_Type3.IsChecked == true)
+        {
+            newoption.overallcardweight += 14;
+            newoption.charcardweight = 14;
+            newoption.impact = 14;
+        }
 
         foreach (CardStats mycard in selectedcard)
         {
@@ -706,13 +712,41 @@ public partial class MainWindow : Window
         if (stats.impact != 0)
         {
             if (stats.impact >= 24)
-                stats.stat.Add("80% chance to correct missed pangya shot, +25% clubset experience.");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("+50% clubset experience");
+                else
+                    stats.stat.Add("75% chance to correct missed pangya shot.");
+            }
             else if (stats.impact >= 18)
-                stats.stat.Add("50% chance to correct missed pangya shot, +15% clubset experience.");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("+20% clubset experience");
+                else
+                    stats.stat.Add("50% chance to correct missed pangya shot.");
+            }
             else if (stats.impact >= 12)
-                stats.stat.Add("30% chance to correct missed pangya shot, +10% clubset experience.");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("+10% clubset experience");
+                else
+                    stats.stat.Add("35% chance to correct missed pangya shot.");
+            }
             else if (stats.impact >= 5)
-                stats.stat.Add("20% chance to correct missed pangya shot, +5% clubset experience.");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("+5% clubset experience");
+                else
+                    stats.stat.Add("20% chance to correct missed pangya shot.");
+            }
             else
                 stats.stat.Add("10% chance to correct missed pangya shot.");
         }
@@ -967,6 +1001,7 @@ public partial class MainWindow : Window
             ResetButton.IsEnabled = false;
             Special_Clubset_Type1.IsEnabled = false;
             Special_Clubset_Type2.IsEnabled = false;
+            Special_Clubset_Type3.IsEnabled = false;
             Calculateforrandomizing();
         }
     }
@@ -990,8 +1025,10 @@ public partial class MainWindow : Window
         ResetButton.IsEnabled = true;
         Special_Clubset_Type1.IsEnabled = true;
         Special_Clubset_Type2.IsEnabled = true;
+        Special_Clubset_Type3.IsEnabled = true;
         Special_Clubset_Type1.IsChecked = false;
         Special_Clubset_Type2.IsChecked = false;
+        Special_Clubset_Type3.IsChecked = false;
         RandomizeCount = 0;
         RandCounterText.Content = RandomizeCount.ToString();
     }
@@ -1002,12 +1039,14 @@ public partial class MainWindow : Window
         ResetButton.IsEnabled = true;
         Special_Clubset_Type1.IsEnabled = true;
         Special_Clubset_Type2.IsEnabled = true;
+        Special_Clubset_Type3.IsEnabled = true;
     }
     private void Special_Clubset_Type1_Checked(object sender, RoutedEventArgs e)
     {
         if (Special_Clubset_Type1.IsChecked == true)
         {
             Special_Clubset_Type2.IsChecked = false;
+            Special_Clubset_Type3.IsChecked = false;
         }
     }
 
@@ -1016,6 +1055,15 @@ public partial class MainWindow : Window
         if (Special_Clubset_Type2.IsChecked == true)
         {
             Special_Clubset_Type1.IsChecked = false;
+            Special_Clubset_Type3.IsChecked = false;
+        }
+    }
+    private void Special_Clubset_Type3_Checked(object sender, RoutedEventArgs e)
+    {
+        if (Special_Clubset_Type3.IsChecked == true)
+        {
+            Special_Clubset_Type1.IsChecked = false;
+            Special_Clubset_Type2.IsChecked = false;
         }
     }
 
@@ -1035,4 +1083,6 @@ public partial class MainWindow : Window
         RandCounterText.Content = RandomizeCount.ToString();
     }
     #endregion
+
+    
 }
