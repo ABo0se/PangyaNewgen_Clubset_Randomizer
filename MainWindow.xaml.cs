@@ -422,6 +422,8 @@ public partial class MainWindow : Window
         cardstatcollection.Add(PippinUL);
         CardStats KoohUL = new CardStats("KoohUL", true, 5, 5, 0, 2, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(KoohUL);
+        CardStats LoloUL = new CardStats("LoloUL", false, 4, 0, 4, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        cardstatcollection.Add(LoloUL);
         /////////////////////////////////////////////////
         //foreach (CardStats card in cardstatcollection)
         //{
@@ -674,11 +676,11 @@ public partial class MainWindow : Window
             if (stats.impact >= 24)
                 stats.stat.Add("80% chance to correct missed pangya shot, +25% clubset experience.");
             else if (stats.impact >= 18)
-                stats.stat.Add("50% chance to correct missed pangya shot.");
+                stats.stat.Add("50% chance to correct missed pangya shot, +15% clubset experience.");
             else if (stats.impact >= 12)
-                stats.stat.Add("30% chance to correct missed pangya shot.");
+                stats.stat.Add("30% chance to correct missed pangya shot, +10% clubset experience.");
             else if (stats.impact >= 5)
-                stats.stat.Add("20% chance to correct missed pangya shot.");
+                stats.stat.Add("20% chance to correct missed pangya shot, +5% clubset experience.");
             else
                 stats.stat.Add("10% chance to correct missed pangya shot.");
         }
