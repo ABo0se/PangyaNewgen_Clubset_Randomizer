@@ -848,10 +848,8 @@ public partial class MainWindow : Window
             if (stats.windreduction >= 24)
             {
                 Random rndnum = new Random();
-                int mynumber = rndnum.Next(0, 4);
+                int mynumber = rndnum.Next(0, 2);
                 if (mynumber == 1)
-                    stats.stat.Add("10% chance to reduce wind speed to 1m/s + 1/2,000 Chance to drop Azure Zepnhr artifact.");
-                else if (mynumber == 2)
                     stats.stat.Add("10% chance to reduce wind speed to 1m/s + 4x chance to drop wind related artifact.");
                 else
                     stats.stat.Add("Reduce all wind speed by 1.");
