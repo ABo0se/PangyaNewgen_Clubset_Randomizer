@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.VisualBasic.FileIO;
 
 namespace PangyaRandomizerDesign;
 public partial class MainWindow : Window
@@ -46,7 +47,9 @@ public partial class MainWindow : Window
         RandomizeOptionStats newoption = new RandomizeOptionStats();
 
         //Add bonus if try to use different card.
-        List <CardStats> listofuniqcard = selectedcard.Distinct().ToList();
+        List<CardStats> listofuniqcard = selectedcard.Distinct().ToList();
+        listofuniqcard.RemoveAll(card => card.cardname == "SC-Ore" || card.cardname == "UL-Ore");
+
         if (listofuniqcard.Count >= 2)
         {
             newoption.overallcardweight += listofuniqcard.Count - 1;
@@ -64,12 +67,19 @@ public partial class MainWindow : Window
             newoption.buffpangnpc = 12;
             newoption.buffexpnpc = 12;
         }
+        else if (Special_Clubset_Type3.IsChecked == true)
+        {
+            newoption.overallcardweight += 14;
+            newoption.charcardweight = 14;
+            newoption.impact = 14;
+        }
 
         foreach (CardStats mycard in selectedcard)
         {
             newoption.overallcardweight += mycard.overallcardweight;
-            if (mycard.ischarcard)
+            if (mycard.typecard == 1)
             {
+                //Character card
                 newoption.charcardweight += mycard.charcardweight;
                 newoption.power += mycard.powerslot;
                 newoption.control += mycard.controlslot;
@@ -77,8 +87,31 @@ public partial class MainWindow : Window
                 newoption.spin += mycard.spinslot;
                 newoption.curve += mycard.curveslot;
             }
-            else
+            else if (mycard.typecard == 2)
             {
+                //Caddie card
+                newoption.othercardweight += mycard.othercardweight;
+                newoption.speciallength += mycard.speciallength;
+                newoption.speciallengthgauge += (int)(3 * (float)(mycard.speciallengthgauge / 8.0f));
+                newoption.pangyapx += (int)(3 * (float)(mycard.pangyapx / 2.0f));
+                newoption.initialguage += (int)(3 * (float)(mycard.initialguage / 33.0f));
+                newoption.passivegauge += (int)(3 * (float)(mycard.passivegauge / 4.0f));
+                newoption.windreduction += 3 * mycard.windreduction;
+                newoption.pangyapxnpc += (int)(3 * (float)(mycard.pangyapxnpc / 4.0f));
+                newoption.buffpangnpc += (int)(3 * (float)(mycard.buffpangnpc / 20.0f));
+                newoption.buffexpnpc += (int)(3 * (float)(mycard.buffexpnpc / 20.0f));
+                newoption.buffcontrolnpc += (int)(3 * (float)(mycard.buffcontrolnpc / 4.0f));
+                newoption.buffdroprate += (int)(3 * (float)(mycard.buffdroprate / 4.0f));
+            }
+            else if (mycard.typecard == 3)
+            {
+                //Card Ore
+                newoption.charcardweight += mycard.charcardweight;
+                newoption.power += mycard.powerslot;
+                newoption.control += mycard.controlslot;
+                newoption.impact += mycard.impactslot;
+                newoption.spin += mycard.spinslot;
+                newoption.curve += mycard.curveslot;
                 newoption.othercardweight += mycard.othercardweight;
                 newoption.speciallength += mycard.speciallength;
                 newoption.speciallengthgauge += (int)(3 * (float)(mycard.speciallengthgauge / 8.0f));
@@ -268,7 +301,7 @@ public partial class MainWindow : Window
         //MessageBox.Show("สุ่มสถานะเรียบร้อยแล้ว");
     }
     #region Classes
-    public class CardStats(string? cardname1, bool ischarcard1, int overallcardweight1,
+    public class CardStats(string? cardname1, int typecard1, int overallcardweight1,
                            int charcardweight1, int caddiecardweight1, int powerslot1,
                            int controlslot1, int impactslot1, int spinslot1, int curveslot1,
                            int speciallength1, int speciallengthguage1, int pangyapx1,
@@ -277,7 +310,7 @@ public partial class MainWindow : Window
     {
         //card weight ranged from 0-5
         public string? cardname = cardname1;
-        public bool ischarcard = ischarcard1;
+        public int typecard = typecard1;
         public int overallcardweight = overallcardweight1;
         public int charcardweight = charcardweight1;
         public int othercardweight = caddiecardweight1;
@@ -346,82 +379,89 @@ public partial class MainWindow : Window
     #region CardStats
     public void addcardstats()
     {
-        CardStats CadieSC = new CardStats("CadieSC", false, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0);
+        //Slot 2 = Type => 1 = Character, 2 = Caddie, 3 = normal;
+        CardStats CadieSC = new CardStats("CadieSC", 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(CadieSC);
-        CardStats TitanBooSC = new CardStats("TitanBooSC", false, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0);
+        CardStats TitanBooSC = new CardStats("TitanBooSC", 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0);
         cardstatcollection.Add(TitanBooSC);
-        CardStats NuriSC = new CardStats("NuriSC", true, 2, 2, 0, 0, 2, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats NuriSC = new CardStats("NuriSC", 1, 2, 2, 0, 0, 2, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(NuriSC);
-        CardStats LuciaSC = new CardStats("LuciaSC", true, 2, 2, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats LuciaSC = new CardStats("LuciaSC", 1, 2, 2, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(LuciaSC);
-        CardStats ArthurSC = new CardStats("ArthurSC", true, 2, 2, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats ArthurSC = new CardStats("ArthurSC", 1, 2, 2, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(ArthurSC);
-        CardStats KazSC = new CardStats("KazSC", true, 2, 2, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats KazSC = new CardStats("KazSC", 1, 2, 2, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(KazSC);
-        CardStats SuccubusSC = new CardStats("SuccubusSC", true, 3, 3, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats SuccubusSC = new CardStats("SuccubusSC", 1, 3, 3, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(SuccubusSC);
-        CardStats NellSC = new CardStats("NellSC", true, 2, 2, 0, 0, 2, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats NellSC = new CardStats("NellSC", 1, 2, 2, 0, 0, 2, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(NellSC);
-        CardStats SpikaSC = new CardStats("SpikaSC", true, 2, 2, 0, 0, 2, 0, 3, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats SpikaSC = new CardStats("SpikaSC", 1, 2, 2, 0, 0, 2, 0, 3, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(SpikaSC);
-        CardStats PippinSC = new CardStats("PippinSC", false, 2, 0, 2, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats PippinSC = new CardStats("PippinSC", 2, 2, 0, 2, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(PippinSC);
-        CardStats MintySC = new CardStats("MintySC", false, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0);
+        CardStats MintySC = new CardStats("MintySC", 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(MintySC);
-        CardStats KoohSC = new CardStats("KoohSC", true, 3, 3, 0, 1, 3, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats KoohSC = new CardStats("KoohSC", 1, 3, 3, 0, 1, 3, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(KoohSC);
-        CardStats CeciliaSC = new CardStats("CeciliaSC", true, 3, 3, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats CeciliaSC = new CardStats("CeciliaSC", 1, 3, 3, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(CeciliaSC);
-        CardStats MaxSC = new CardStats("MaxSC", true, 2, 2, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats MaxSC = new CardStats("MaxSC", 1, 2, 2, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(MaxSC);
-        CardStats ArinSC = new CardStats("ArinSC", true, 3, 3, 0, 0, 0, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats ArinSC = new CardStats("ArinSC", 1, 3, 3, 0, 0, 0, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(ArinSC);
-        CardStats RyoTohsakaSC = new CardStats("RyoTohsakaSC", true, 3, 3, 0, 0, 2, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats RyoTohsakaSC = new CardStats("RyoTohsakaSC", 1, 3, 3, 0, 0, 2, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(RyoTohsakaSC);
-        CardStats ArchSC = new CardStats("ArchSC", true, 3, 3, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats ArchSC = new CardStats("ArchSC", 1, 3, 3, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(ArchSC);
-        CardStats KettoshiSC = new CardStats("KettoshiSC", true, 3, 3, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats KettoshiSC = new CardStats("KettoshiSC", 1, 3, 3, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(KettoshiSC);
-        CardStats HanaSC = new CardStats("HanaSC", true, 2, 2, 0, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats HanaSC = new CardStats("HanaSC", 1, 2, 2, 0, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(HanaSC);
-        CardStats LilimSC = new CardStats("LilimSC", true, 3, 3, 0, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats LilimSC = new CardStats("LilimSC", 1, 3, 3, 0, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(LilimSC);
-        CardStats DominionSC = new CardStats("DominionSC", true, 3, 3, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats DominionSC = new CardStats("DominionSC", 1, 3, 3, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(DominionSC);
-        CardStats BaphometSC = new CardStats("BaphometSC", true, 3, 3, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats BaphometSC = new CardStats("BaphometSC", 1, 3, 3, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(BaphometSC);
-        CardStats KyungshiSC = new CardStats("KyungshiSC", true, 3, 3, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats KyungshiSC = new CardStats("KyungshiSC", 1, 3, 3, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(KyungshiSC);
-        CardStats SaberSC = new CardStats("SaberSC", false, 3, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats SaberSC = new CardStats("SaberSC", 2, 3, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(SaberSC);
-        CardStats TitanChamSC = new CardStats("TitanChamSC", false, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0);
+        CardStats TitanChamSC = new CardStats("TitanChamSC", 2, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0);
         cardstatcollection.Add(TitanChamSC);
-        CardStats BongdariSC = new CardStats("BongdariSC", false, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4);
+        CardStats BongdariSC = new CardStats("BongdariSC", 2, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4);
         cardstatcollection.Add(BongdariSC);
-        CardStats LoloSC = new CardStats("LoloSC", false, 2, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats LoloSC = new CardStats("LoloSC", 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(LoloSC);
-        CardStats KumaSC = new CardStats("KumaSC", false, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0);
+        CardStats KumaSC = new CardStats("KumaSC", 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(KumaSC);
-        CardStats LukaSC = new CardStats("LukaSC", false, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0);
+        CardStats LukaSC = new CardStats("LukaSC", 2, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0);
         cardstatcollection.Add(LukaSC);
-        CardStats CamenSC = new CardStats("CamenSC", false, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0);
+        CardStats CamenSC = new CardStats("CamenSC", 2, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0);
         cardstatcollection.Add(CamenSC);
-        CardStats MurenSC = new CardStats("MurenSC", false, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0);
+        CardStats MurenSC = new CardStats("MurenSC", 2, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0);
         cardstatcollection.Add(MurenSC);
-        CardStats CadieUL = new CardStats("CadieUL", false, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats CadieUL = new CardStats("CadieUL", 2, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(CadieUL);
-        CardStats KumaUL = new CardStats("KumaUL", false, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0);
+        CardStats KumaUL = new CardStats("KumaUL", 2, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(KumaUL);
-        CardStats TitanBooUL = new CardStats("TitanBooUL", false, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0);
+        CardStats TitanBooUL = new CardStats("TitanBooUL", 2, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0);
         cardstatcollection.Add(TitanBooUL);
-        CardStats MintyUL = new CardStats("MintyUL", false, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0);
+        CardStats MintyUL = new CardStats("MintyUL", 2, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(MintyUL);
-        CardStats MaxUL = new CardStats("MaxUL", true, 5, 5, 0, 5, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats MaxUL = new CardStats("MaxUL", 1, 5, 5, 0, 5, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(MaxUL);
-        CardStats PippinUL = new CardStats("PippinUL", false, 4, 0, 4, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats PippinUL = new CardStats("PippinUL", 2, 4, 0, 4, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(PippinUL);
-        CardStats KoohUL = new CardStats("KoohUL", true, 5, 5, 0, 2, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        CardStats KoohUL = new CardStats("KoohUL", 1, 5, 5, 0, 2, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         cardstatcollection.Add(KoohUL);
+        CardStats LoloUL = new CardStats("LoloUL", 2, 4, 0, 4, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        cardstatcollection.Add(LoloUL);
+        CardStats SCOre = new CardStats("SC-Ore", 3, 2, 1, 1, 1, 1, 1, 1, 1, 4, 8, 1, 33, 4, 1, 4, 20, 20, 1, 4);
+        cardstatcollection.Add(SCOre);
+        CardStats ULOre = new CardStats("UL-Ore", 3, 4, 4, 3, 3, 3, 3, 3, 3, 8, 12, 4, 60, 8, 2, 4, 50, 50, 6, 10);
+        cardstatcollection.Add(ULOre);
         /////////////////////////////////////////////////
         //foreach (CardStats card in cardstatcollection)
         //{
@@ -672,13 +712,41 @@ public partial class MainWindow : Window
         if (stats.impact != 0)
         {
             if (stats.impact >= 24)
-                stats.stat.Add("80% chance to correct missed pangya shot, +25% clubset experience.");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("+50% clubset experience");
+                else
+                    stats.stat.Add("75% chance to correct missed pangya shot.");
+            }
             else if (stats.impact >= 18)
-                stats.stat.Add("50% chance to correct missed pangya shot.");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("+20% clubset experience");
+                else
+                    stats.stat.Add("50% chance to correct missed pangya shot.");
+            }
             else if (stats.impact >= 12)
-                stats.stat.Add("30% chance to correct missed pangya shot.");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("+10% clubset experience");
+                else
+                    stats.stat.Add("35% chance to correct missed pangya shot.");
+            }
             else if (stats.impact >= 5)
-                stats.stat.Add("20% chance to correct missed pangya shot.");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("+5% clubset experience");
+                else
+                    stats.stat.Add("20% chance to correct missed pangya shot.");
+            }
             else
                 stats.stat.Add("10% chance to correct missed pangya shot.");
         }
@@ -724,15 +792,51 @@ public partial class MainWindow : Window
         if (stats.speciallengthgauge > 0)
         {
             if (stats.speciallengthgauge >= 24)
-                stats.stat.Add("Special shot Length +12 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +12 Yards");
+                else
+                    stats.stat.Add("Guage +12 points when hit special shot");
+            }
+
             else if (stats.speciallengthgauge >= 18)
-                stats.stat.Add("Special shot Length +10 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +10 Yards");
+                else
+                    stats.stat.Add("Guage +8 points when hit special shot");
+            }
             else if (stats.speciallengthgauge >= 12)
-                stats.stat.Add("Special shot Length +8 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +8 Yards");
+                else
+                    stats.stat.Add("Guage +6 points when hit special shot");
+            }
             else if (stats.speciallengthgauge >= 5)
-                stats.stat.Add("Special shot Length +6 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +6 Yards");
+                else
+                    stats.stat.Add("Guage +4 points when hit special shot");
+            }
             else
-                stats.stat.Add("Special shot Length +4 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +2 Yards");
+                else
+                    stats.stat.Add("Guage +2 points when hit special shot");
+            }
         }
         if (stats.pangyapx > 0)
         {
@@ -750,28 +854,98 @@ public partial class MainWindow : Window
         if (stats.initialguage > 0)
         {
             if (stats.initialguage >= 24)
-                stats.stat.Add("Initial guage +60 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +60 points");
+                else
+                    stats.stat.Add("Guage +8 points when new holes begin");
+            }
             else if (stats.initialguage >= 18)
-                stats.stat.Add("Initial guage +33 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +33 points");
+                else
+                    stats.stat.Add("Guage +4 points when new holes begin");
+            }
             else if (stats.initialguage >= 12)
-                stats.stat.Add("Initial guage +24 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +24 points");
+                else
+                    stats.stat.Add("Guage +3 points when new holes begin");
+            }
             else if (stats.initialguage >= 5)
-                stats.stat.Add("Initial guage +15 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +15 points");
+                else
+                    stats.stat.Add("Guage +2 points when new holes begin");
+            }
             else
-                stats.stat.Add("Initial guage +10 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +10 points");
+                else
+                    stats.stat.Add("Guage +1 point when new holes begin");
+            }
         }
         if (stats.passivegauge > 0)
         {
             if (stats.passivegauge >= 24)
-                stats.stat.Add("Guage +6 points when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +16 points when using items");
+                else
+                    stats.stat.Add("Guage +8 points when hit pangya");
+            }
             else if (stats.passivegauge >= 18)
-                stats.stat.Add("Guage +4 points when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +8 points when using items");
+                else
+                    stats.stat.Add("Guage +4 points when hit pangya");
+            }
             else if (stats.passivegauge >= 12)
-                stats.stat.Add("Guage +3 points when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +6 points when using items");
+                else
+                    stats.stat.Add("Guage +3 points when hit pangya");
+            }
             else if (stats.passivegauge >= 5)
-                stats.stat.Add("Guage +2 points when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +4 points when using items");
+                else
+                    stats.stat.Add("Guage +2 points when hit pangya");
+            }
             else
-                stats.stat.Add("Guage +1 point when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +2 points when using items");
+                else
+                    stats.stat.Add("Guage +1 point when hit pangya");
+            }
         }
         if (stats.windreduction > 0)
         {
@@ -782,20 +956,50 @@ public partial class MainWindow : Window
                 Random rndnum = new Random();
                 int mynumber = rndnum.Next(0, 4);
                 if (mynumber == 1)
-                    stats.stat.Add("10% chance to reduce wind speed to 1m/s + 1/2,000 Chance to drop Azure Zepnhr artifact.");
+                    stats.stat.Add("10% chance to reduce wind speed to 1m/s.");
                 else if (mynumber == 2)
-                    stats.stat.Add("10% chance to reduce wind speed to 1m/s + 4x chance to drop wind related artifact.");
+                    stats.stat.Add("12.5% chance to change wind direction to headwind/tailwind");
+                else if (mynumber == 3)
+                    stats.stat.Add("Wind related artifact will be charged more often.");
                 else
                     stats.stat.Add("Reduce all wind speed by 1.");
-            }  
+            }
             else if (stats.windreduction >= 18)
-                stats.stat.Add("7.5% chance to reduce wind speed to 1m/s");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("7.5% chance to reduce wind speed to 1m/s");
+                else
+                    stats.stat.Add("10% chance to change wind direction to headwind/tailwind");
+            }
             else if (stats.windreduction >= 12)
-                stats.stat.Add("5% chance to reduce wind speed to 1m/s");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("5% chance to reduce wind speed to 1m/s");
+                else
+                    stats.stat.Add("7.5% chance to change wind direction to headwind/tailwind");
+            }
             else if (stats.windreduction >= 5)
-                stats.stat.Add("5% chance to change wind direction to headwind/tailwind");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("2.5% chance to reduce wind speed to 1m/s");
+                else
+                    stats.stat.Add("5% chance to change wind direction to headwind/tailwind");
+            }
             else
-                stats.stat.Add("3% chance to change wind direction to headwind/tailwind");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("1.5% chance to reduce wind speed to 1m/s");
+                else
+                    stats.stat.Add("2.5% chance to change wind direction to headwind/tailwind");
+            }
         }
         if (stats.pangyapxnpc > 0)
         {
@@ -933,6 +1137,7 @@ public partial class MainWindow : Window
             ResetButton.IsEnabled = false;
             Special_Clubset_Type1.IsEnabled = false;
             Special_Clubset_Type2.IsEnabled = false;
+            Special_Clubset_Type3.IsEnabled = false;
             Calculateforrandomizing();
         }
     }
@@ -956,8 +1161,10 @@ public partial class MainWindow : Window
         ResetButton.IsEnabled = true;
         Special_Clubset_Type1.IsEnabled = true;
         Special_Clubset_Type2.IsEnabled = true;
+        Special_Clubset_Type3.IsEnabled = true;
         Special_Clubset_Type1.IsChecked = false;
         Special_Clubset_Type2.IsChecked = false;
+        Special_Clubset_Type3.IsChecked = false;
         RandomizeCount = 0;
         RandCounterText.Content = RandomizeCount.ToString();
     }
@@ -968,12 +1175,14 @@ public partial class MainWindow : Window
         ResetButton.IsEnabled = true;
         Special_Clubset_Type1.IsEnabled = true;
         Special_Clubset_Type2.IsEnabled = true;
+        Special_Clubset_Type3.IsEnabled = true;
     }
     private void Special_Clubset_Type1_Checked(object sender, RoutedEventArgs e)
     {
         if (Special_Clubset_Type1.IsChecked == true)
         {
             Special_Clubset_Type2.IsChecked = false;
+            Special_Clubset_Type3.IsChecked = false;
         }
     }
 
@@ -982,6 +1191,15 @@ public partial class MainWindow : Window
         if (Special_Clubset_Type2.IsChecked == true)
         {
             Special_Clubset_Type1.IsChecked = false;
+            Special_Clubset_Type3.IsChecked = false;
+        }
+    }
+    private void Special_Clubset_Type3_Checked(object sender, RoutedEventArgs e)
+    {
+        if (Special_Clubset_Type3.IsChecked == true)
+        {
+            Special_Clubset_Type1.IsChecked = false;
+            Special_Clubset_Type2.IsChecked = false;
         }
     }
 
@@ -1001,4 +1219,6 @@ public partial class MainWindow : Window
         RandCounterText.Content = RandomizeCount.ToString();
     }
     #endregion
+
+    
 }
