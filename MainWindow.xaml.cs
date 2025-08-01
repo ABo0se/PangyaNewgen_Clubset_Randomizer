@@ -792,15 +792,51 @@ public partial class MainWindow : Window
         if (stats.speciallengthgauge > 0)
         {
             if (stats.speciallengthgauge >= 24)
-                stats.stat.Add("Special shot Length +12 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +12 Yards");
+                else
+                    stats.stat.Add("Guage +12 points when hit special shot");
+            }
+
             else if (stats.speciallengthgauge >= 18)
-                stats.stat.Add("Special shot Length +10 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +10 Yards");
+                else
+                    stats.stat.Add("Guage +8 points when hit special shot");
+            }
             else if (stats.speciallengthgauge >= 12)
-                stats.stat.Add("Special shot Length +8 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +8 Yards");
+                else
+                    stats.stat.Add("Guage +6 points when hit special shot");
+            }
             else if (stats.speciallengthgauge >= 5)
-                stats.stat.Add("Special shot Length +6 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +6 Yards");
+                else
+                    stats.stat.Add("Guage +4 points when hit special shot");
+            }
             else
-                stats.stat.Add("Special shot Length +4 Yards");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Special shot Length +2 Yards");
+                else
+                    stats.stat.Add("Guage +2 points when hit special shot");
+            }
         }
         if (stats.pangyapx > 0)
         {
@@ -818,28 +854,98 @@ public partial class MainWindow : Window
         if (stats.initialguage > 0)
         {
             if (stats.initialguage >= 24)
-                stats.stat.Add("Initial guage +60 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +60 points");
+                else
+                    stats.stat.Add("Guage +8 points when new holes begin");
+            }
             else if (stats.initialguage >= 18)
-                stats.stat.Add("Initial guage +33 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +33 points");
+                else
+                    stats.stat.Add("Guage +4 points when new holes begin");
+            }
             else if (stats.initialguage >= 12)
-                stats.stat.Add("Initial guage +24 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +24 points");
+                else
+                    stats.stat.Add("Guage +3 points when new holes begin");
+            }
             else if (stats.initialguage >= 5)
-                stats.stat.Add("Initial guage +15 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +15 points");
+                else
+                    stats.stat.Add("Guage +2 points when new holes begin");
+            }
             else
-                stats.stat.Add("Initial guage +10 points");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Initial guage +10 points");
+                else
+                    stats.stat.Add("Guage +1 point when new holes begin");
+            }
         }
         if (stats.passivegauge > 0)
         {
             if (stats.passivegauge >= 24)
-                stats.stat.Add("Guage +6 points when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +16 points when using items");
+                else
+                    stats.stat.Add("Guage +8 points when hit pangya");
+            }
             else if (stats.passivegauge >= 18)
-                stats.stat.Add("Guage +4 points when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +8 points when using items");
+                else
+                    stats.stat.Add("Guage +4 points when hit pangya");
+            }
             else if (stats.passivegauge >= 12)
-                stats.stat.Add("Guage +3 points when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +6 points when using items");
+                else
+                    stats.stat.Add("Guage +3 points when hit pangya");
+            }
             else if (stats.passivegauge >= 5)
-                stats.stat.Add("Guage +2 points when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +4 points when using items");
+                else
+                    stats.stat.Add("Guage +2 points when hit pangya");
+            }
             else
-                stats.stat.Add("Guage +1 point when hit pangya");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("Guage +2 points when using items");
+                else
+                    stats.stat.Add("Guage +1 point when hit pangya");
+            }
         }
         if (stats.windreduction > 0)
         {
@@ -848,20 +954,52 @@ public partial class MainWindow : Window
             if (stats.windreduction >= 24)
             {
                 Random rndnum = new Random();
-                int mynumber = rndnum.Next(0, 2);
+                int mynumber = rndnum.Next(0, 4);
                 if (mynumber == 1)
-                    stats.stat.Add("10% chance to reduce wind speed to 1m/s + 4x chance to drop wind related artifact.");
+                    stats.stat.Add("10% chance to reduce wind speed to 1m/s.");
+                else if (mynumber == 2)
+                    stats.stat.Add("12.5% chance to change wind direction to headwind/tailwind");
+                else if (mynumber == 3)
+                    stats.stat.Add("Wind related artifact will be charged more often.");
                 else
                     stats.stat.Add("Reduce all wind speed by 1.");
-            }  
+            }
             else if (stats.windreduction >= 18)
-                stats.stat.Add("7.5% chance to reduce wind speed to 1m/s");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("7.5% chance to reduce wind speed to 1m/s");
+                else
+                    stats.stat.Add("10% chance to change wind direction to headwind/tailwind");
+            }
             else if (stats.windreduction >= 12)
-                stats.stat.Add("5% chance to reduce wind speed to 1m/s");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("5% chance to reduce wind speed to 1m/s");
+                else
+                    stats.stat.Add("7.5% chance to change wind direction to headwind/tailwind");
+            }
             else if (stats.windreduction >= 5)
-                stats.stat.Add("5% chance to change wind direction to headwind/tailwind");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("2.5% chance to reduce wind speed to 1m/s");
+                else
+                    stats.stat.Add("5% chance to change wind direction to headwind/tailwind");
+            }
             else
-                stats.stat.Add("3% chance to change wind direction to headwind/tailwind");
+            {
+                Random rndnum = new Random();
+                int mynumber = rndnum.Next(0, 2);
+                if (mynumber == 1)
+                    stats.stat.Add("1.5% chance to reduce wind speed to 1m/s");
+                else
+                    stats.stat.Add("2.5% chance to change wind direction to headwind/tailwind");
+            }
         }
         if (stats.pangyapxnpc > 0)
         {
